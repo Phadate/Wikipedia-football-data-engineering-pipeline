@@ -1,20 +1,21 @@
 
 
 from airflow import DAG
-from datetime import date 
+from datetime import datetime 
 from airflow.operators import PythonOperator
-from pipelines.wiki_pipeline import get_wikipedia_page
 
 import os
 import sys
 
 sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from pipelines.wiki_pipeline import get_wikipedia_page
+
 dag =DAG(
     dag_id ="wikiFlow",
     default_args={
         "owner": "Dunsin Fayode",
-        "start_date": date(2025,08,24),
+        "start_date": datetime(2025,09,10),
     },
     schedule_interval=None,
     catchup=False
