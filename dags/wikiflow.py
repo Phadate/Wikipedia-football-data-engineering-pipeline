@@ -7,22 +7,22 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from pipelines.wiki_pipeline import extract_wikipedia_data
+from pipelines.wiki_pipeline import extract_wikipedia_data, transform_wikipedia_data, write_wikipedia_data
 
 dag = DAG(
     dag_id="wikiFlow",
     default_args={
         "owner": "Dunsin Fayode",
-        "start_date": datetime(2025, 9, 13), 
-        "retries": 2,
+        "start_date": datetime.now(), 
+        "retries": 2
     },
     schedule_interval=None,
     catchup=False
 )
 
 # extraction
-extract_data_from_wikipedia = PythonOperator(
-    task_id="extract_data_from_wikipedia",
+extract_wikipedia_data = PythonOperator(
+    task_id="extract_wikipedia_data",
     python_callable=extract_wikipedia_data,
     provide_context=True,
     op_kwargs={
@@ -32,12 +32,20 @@ extract_data_from_wikipedia = PythonOperator(
     dag=dag
 )
 # prep (optional second task if re-enabled)
-# process_wikipedia_data = PythonOperator(
-#     task_id="process_wikipedia_data",
-#     python_callable=get_wikipedia_data,
-#     provide_context=True,
-#     op_kwargs={"html": "{{ task_instance.xcom_pull(task_ids='extract_data_from_wikipedia') }}"},
-#     dag=dag
-# )
-#
-# extract_data_from_wikipedia >> process_wikipedia_data
+transform_wikipedia_data = PythonOperator(
+    task_id="transform_wikipedia_data",
+    python_callable=transform_wikipedia_data,
+    provide_context=True,
+    dag=dag
+)
+
+# write to csv the location
+
+write_wikipedia_data = PythonOperator(
+    task_id='write_wikipedia_data',
+    provide_context=True,
+    python_callable=write_wikipedia_data,
+    dag=dag
+)
+
+extract_wikipedia_data >> transform_wikipedia_data >> write_wikipedia_data
