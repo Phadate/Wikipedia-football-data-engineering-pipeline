@@ -18,6 +18,7 @@ azure-synapse-artifacts
 pandas
 numpy
 sqlalchemy
+geopy
 
 # HTTP/API Clients
 requests
